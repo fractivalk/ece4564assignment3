@@ -29,4 +29,4 @@ def get_example1():
     return jsonify({'example1': example1})
 
 if __name__ == "__main__":
-    app.run(host = "192.168.137.182', port=5000", debug=True) #IP is based of current pi being used, 5000 is Flask DP
+    app.run(host = "192.168.137.182", port=5000, debug=True) #IP is based of current pi being used, 5000 is Flask DP
