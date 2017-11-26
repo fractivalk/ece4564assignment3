@@ -1,5 +1,6 @@
-import pymongo
-from flask import Flask
+import json
+from flask import Flask, jsonify
+from pymongo import MongoClient
 
 #online example, creates server on ip and returns Hello World
 
@@ -7,7 +8,7 @@ from flask import Flask
 app = Flask(__name__)
 
 #create MongoDB connection
-connection = Connection('localhost', 27017)
+connection = MongoClient('localhost', 27017)
 db = connection.ufo
 
 example1 = [
@@ -24,7 +25,7 @@ example1 = [
 
 ]
 
-@app.route("/", methods =['GET'])
+@app.route("/example1", methods =['GET'])
 def get_example1():
     return jsonify({'example1': example1})
 
