@@ -1,7 +1,7 @@
 import json
 from flask import Flask, jsonify
 from pymongo import MongoClient
-from flask import make_response
+from flask import make_response, request, abort
 
 #online example, creates server on ip and returns Hello World
 
@@ -14,31 +14,34 @@ db = connection.ufo
 
 example1 = [
     {
-        "id": 1,
+        'id': 1,
         'name': u'Nick',
         'level': u'user'
     },
     {
-        "id": 2,
+        'id': 2,
         'name': u'Eric',
         'level': u'scrub'
     },
 
 ]
 
+@app.route("/", methods=['GET'])
+def get_root():
+    return "This is the root directory"
+
 @app.route("/example1", methods =['GET'])
 def get_example1():
     return jsonify({'example1': example1})
 
-@app.route("/example1", methods = ['POST'])
+@app.route("/example1", methods =['POST'])
 def create_example1():
-    example = {
-        'id' : example1[-1]['id'] + 1,
-        'name': request.json['name'],
-        'level': request.json.get('level', "")
-    }
+    if not request.json or not 'name' in request.json:
+        abort(400)
+    example = request.get_json()
     example1.append(example)
-    return jsonify({'example': example}), 201
+    return jsonify(example)
+    return "Successfully Posted"
 
 
 if __name__ == "__main__":
