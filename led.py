@@ -19,11 +19,12 @@ Freq = 100
 RED = GPIO.PWM(red, Freq)
 GREEN = GPIO.PWM(green, Freq)
 BLUE = GPIO.PWM(blue, Freq)
-
+print('testing1')
 while 1:
-    RED.start(50)
-    GREEN.start(10)
-    BLUE.start(30)
+    print('testing2')
+    RED.start(100)
+    GREEN.start(100)
+    BLUE.start(100)
 
 # @app.route("/")
 # def main():
