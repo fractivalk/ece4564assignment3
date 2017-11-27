@@ -51,7 +51,7 @@ def requires_auth(f):
 @app.route('/secret-page')
 @requires_auth
 def secret_page():
-    return render_template('secret_page.html')
+    return "Successfully Authenticated"
 
 @app.route("/", methods=['GET'])
 def get_root():
