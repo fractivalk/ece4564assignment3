@@ -30,7 +30,7 @@ def check_auth(username, password):
     """This function is called to check if a username /
     password combination is valid.
     """
-    return username == 'admin' and password == 'secret'
+    return username == 'eric' and password == 'sux'
 
 def authenticate():
     """Sends a 401 response that enables basic auth"""
@@ -54,14 +54,17 @@ def secret_page():
     return "Successfully Authenticated"
 
 @app.route("/", methods=['GET'])
+@requires_auth
 def get_root():
     return "This is the root directory"
 
 @app.route("/example1", methods =['GET'])
+@requires_auth
 def get_example1():
     return jsonify({'example1': example1})
 
 @app.route("/example1", methods =['POST'])
+@requires_auth
 def create_example1():
     if not request.json or not 'name' in request.json:
         abort(400)
