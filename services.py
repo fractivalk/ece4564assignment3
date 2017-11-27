@@ -48,29 +48,21 @@ def requires_auth(f):
         return f(*args, **kwargs)
     return decorated
 
-@app.route('/secret-page')
+#Get command handling python http method to download from canvas API at group directory
+@app.route("/download/<download_file>", methods=['GET'])
 @requires_auth
-def secret_page():
-    return "Successfully Authenticated"
+def get_download(download_file):
+    return "Placeholder: This should send a python http get request to Canvas API and download specified file"
 
-@app.route("/", methods=['GET'])
-@requires_auth
-def get_root():
-    return "This is the root directory"
-
-@app.route("/example1", methods =['GET'])
+@app.route("/", methods =['GET'])
 @requires_auth
 def get_example1():
-    return jsonify({'example1': example1})
+    return "This is the root directory. Why are you here?"
 
-@app.route("/example1", methods =['POST'])
+@app.route("/upload/<upload_file>", methods =['POST'])
 @requires_auth
-def create_example1():
-    if not request.json or not 'name' in request.json:
-        abort(400)
-    example = request.get_json()
-    example1.append(example)
-    return jsonify(example)
+def create_upload(upload_file):
+    #Placeholder: This should send a python http request to the canvas API to upload the specified file to the group directory.
     return "Successfully Posted"
 
 
