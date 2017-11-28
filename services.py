@@ -16,13 +16,8 @@ import urllib.request
 app = Flask(__name__)
 
 #create MongoDB connection
-db = pymongo.MongoClient()['ECE4564_Assignment_3']
-user1 = {"username":"Nick", "password":"cool"}
-user2 = {"username":"Eric", "password":"scrub"}
-user3 = {"username":"Guest", "password":"average"}
-db[user1].drop()
-db[user2].drop()
-db[user3].drop()
+connection = Connection('localhost', 27017)
+db = connection.ufo
 #connection = MongoClient('localhost', 27017)
 #db = connection.ufo
 
@@ -44,6 +39,7 @@ def check_auth(username, password):
     """This function is called to check if a username /
     password combination is valid.
     """
+
     return username == 'eric' and password == 'sux'
 
 def authenticate():
