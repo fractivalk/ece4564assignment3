@@ -16,8 +16,15 @@ import urllib.request
 app = Flask(__name__)
 
 #create MongoDB connection
-connection = MongoClient('localhost', 27017)
-db = connection.ufo
+db = pymongo.MongoClient()['ECE4564_Assignment_3']
+user1 = {"username":"Nick", "password":"cool"}
+user2 = {"username":"Eric", "password":"scrub"}
+user3 = {"username":"Guest", "password":"average"}
+db[user1].drop()
+db[user2].drop()
+db[user3].drop()
+#connection = MongoClient('localhost', 27017)
+#db = connection.ufo
 
 example1 = [
     {
