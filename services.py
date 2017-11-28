@@ -3,6 +3,13 @@ from flask import Flask, jsonify
 from pymongo import MongoClient
 from flask import make_response, request, Response, abort
 from functools import wraps
+import socket
+
+auth = {'access_token':'4511~N31cAx15APjv7QDgwYtY0jIyv7R8bBetGgJFIn0kql3cb4IQjpOyVKPgctxn813C'}
+import requests
+import json
+import urllib.request
+
 #online example, creates server on ip and returns Hello World
 
 #flask
@@ -52,7 +59,14 @@ def requires_auth(f):
 @app.route("/download/<download_file>", methods=['GET'])
 @requires_auth
 def get_download(download_file):
-    return "Placeholder: This should send a python http get request to Canvas API and download specified file"
+    id = ''
+    for i in requests.get('https://vt.instructure.com/api/v1/groups/46547/files/', params=auth).json():
+        if i['filename'] == download_file:
+            id = i['id']
+    if id == '':
+        return 'File \'{}\' not present in remote directory\n'.format(download_file)
+    urllib.request.urlretrieve(requests.get('https://vt.instructure.com/api/v1/groups/46547/files/{}'.format(id) , params=auth).json()['url'], download_file)
+    return 'Download successful\n'
 
 @app.route("/", methods =['GET'])
 @requires_auth
@@ -67,4 +81,9 @@ def create_upload(upload_file):
 
 
 if __name__ == "__main__":
-    app.run(host = "172.29.33.66", port=5000, debug=True) #IP is based of current pi being used, 5000 is Flask DP
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip = s.getsockname()[0]
+    s.close()
+    print(ip)
+    app.run(host = str(ip), port=5000, debug=True) #IP is based of current pi being used, 5000 is Flask DP
