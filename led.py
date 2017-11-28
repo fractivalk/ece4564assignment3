@@ -1,6 +1,7 @@
 import time
 import RPi.GPIO as GPIO
-from flask import Flask, render_template, request, advertise
+from flask import Flask, render_template, request
+from flask.ext.discoverer import Discoverer, advertise
 import json
 
 app = Flask(__name__)
