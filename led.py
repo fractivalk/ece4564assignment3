@@ -5,6 +5,7 @@ from flask.ext.discoverer import Discoverer, advertise
 import json
 
 app = Flask(__name__)
+discoverer = Discoverer(app)
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
