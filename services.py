@@ -95,7 +95,7 @@ def requires_auth(f):
             return authenticate()
         return f(*args, **kwargs)
     return decorated
-	
+
 #Get command handling python http method to download from canvas API at group directory
 @app.route("/download/<download_file>", methods=['GET'])
 @requires_auth
@@ -115,7 +115,7 @@ def get_example1():
     return "This is the root directory. Why are you here?"
 
 @app.route("/upload/<upload_file>", methods =['POST'])
-@requires_auth    
+@requires_auth
 def create_upload(upload_file):
     # Set up a session
     session = requests.Session()
@@ -135,9 +135,9 @@ def create_upload(upload_file):
         file_content = f.read()
     payload.append((u'file', file_content)) # Append file at the end of list of tuples
     r = requests.post(r['upload_url'], files=payload)
-    r.raise_for_status() 
+    r.raise_for_status()
     r = r.json()
-   
+
     return "File \'{}\' successfully posted\n".format(upload_file)
 
 #custom API functionality
@@ -179,6 +179,13 @@ def add_skill(char_name):
         abort(404)
     return jsonify({'char': char[0]})
 
+@requires_auth
+@app.route("/LED", methods=['GET'])
+def led():
+    ledstatus = request.args.get('status')
+    ledcolor = request.args.get('color')
+    ledintensity = request.args.get('intensity')
+    return 'Color: ' + ledcolor + '\nStatus: ' + ledstatus + '\nIntensity: ' + ledintensity + '\n'
 
 
 
