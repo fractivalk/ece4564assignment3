@@ -111,6 +111,43 @@ def create_upload(upload_file):
    
     return "File \'{}\' successfully posted\n".format(upload_file)
 
+#custom API functionality
+
+#Get 1
+@app.route("/PartyInfo", methods=['GET'])
+def fetch_party_info():
+    return jsoninfy(charSht)
+
+#Get 2
+@app.route('/PartyInfo/<char_name>', methods=['GET'])
+def get_char(char_name):
+    char = [char for char in charSht if char['name'] == char_name]
+    if len(char) == 0:
+        abort(404)
+    return jsonify({'char': char[0]})
+
+#Post 1
+@app.route("PartyInfo/AddCharacter", methods=['POST'])
+def add_char():
+    char = {
+        'name': request.json['name'],
+        'level': request.json['level'],
+        'class': request.json['class']
+    }
+    charSht.append(char)
+    return jsonify({'char': char}), 201
+
+#Post 2
+@app.route("PartyInfo/<char_name>/AddSkill", methods=['POST'])
+def add_skill(char_name):
+    [char for char in charSht if char['name'] == char_name]['Skill'] = request.data
+    char = [char for char in charSht if char['name'] == char_name]
+    if len(char) == 0:
+        abort(404)
+    return jsonify({'char': char[0]})
+
+
+
 
 if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
