@@ -1,11 +1,14 @@
-import time
-import RPi.GPIO as GPIO
+
 from flask import Flask, render_template, request
-from flask.ext.discoverer import Discoverer, advertise
+import json
+import logging
+import socket
+import sys
+from time import sleep
+from zeroconf import ServiceInfo, Zeroconf
+import RPi.GPIO as GPIO
 import json
 
-app = Flask(__name__)
-discoverer = Discoverer(app)
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -30,32 +33,19 @@ BLUE.start(0)
 LED_status = False
 LED_color = 'red'
 
-# def color(R, G, B, on_time):
-#     # Color brightness range is 0-100%
-#     RED.ChangeDutyCycle(R)
-#     GREEN.ChangeDutyCycle(G)
-#     BLUE.ChangeDutyCycle(B)
-#     time.sleep(on_time)
-#
-#     # Turn all LEDs off after on_time seconds
-#     RED.ChangeDutyCycle(0)
-#     GREEN.ChangeDutyCycle(0)
-#     BLUE.ChangeDutyCycle(0)
-#     time.sleep(on_time)
-#
-# while 1:
-#     color(50, 10, 30, 1)
+
+app = Flask(__name__)
 
 
 @app.route("/")
 def main():
-   # return render_template('main.html')
-   return "Hello World!"
+    # return render_template('main.html')
+    return "Hello World!"
 
-@advertise(status=["on", "off"],colors=["red","green","blue","magenta","cyan","yellow","white"],intensity='1-100')
+
 @app.route("/LED", methods=['GET', 'POST'])
 def LED():
-    if (request.method == 'POST'):
+    if request.method == 'POST':
         data = json.loads(request.data)
         LED_color = data['color']
         LED_status = data['status']
@@ -86,9 +76,36 @@ def LED():
             GREEN.ChangeDutyCycle(0)
             RED.ChangeDutyCycle(0)
             BLUE.ChangeDutyCycle(0)
-        return 'Changed LED'
+        return 'Changed LED to: ' + data['color'] + data['status']
     else:
-        return ('LED status: ' + LED_status + '\nLED color: ' + LED_color)
+        return 'LED status: < Display Here >'
+
 
 if __name__ == "__main__":
-    app.run(host='172.29.33.66', port=5000, debug=True)
+
+    # ZER0CONF
+    logging.basicConfig(level=logging.DEBUG)
+    if len(sys.argv) > 1:
+        assert sys.argv[1:] == ['--debug']
+        logging.getLogger('zeroconf').setLevel(logging.DEBUG)
+
+    desc = {'path': '/LED/'}
+
+    info = ServiceInfo("_http._tcp.local.",
+                       "COLINSLED._http._tcp.local.",
+                       socket.inet_aton("127.0.0.1"), 80, 0, 0,
+                       desc, "ash-2.local.")
+
+    zeroconf = Zeroconf()
+    print("Registration of a service, press Ctrl-C to exit...")
+    zeroconf.register_service(info)
+
+    # APP
+    try: # 172.29.33.66
+        app.run(host='172.29.102.146', port=5000, debug=True)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        print("Unregistering...")
+        zeroconf.unregister_service(info)
+        zeroconf.close()
