@@ -6,34 +6,49 @@ import socket
 import sys
 from time import sleep
 from zeroconf import ServiceInfo, Zeroconf
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 import json
 
+the_ip = "172.29.102.146"
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
 
-red = 23
-green = 18
-blue = 4
+# GPIO LEDs
+# intensity
+# command line IP address???
+# advertise correct information
+# Services integration and browsing for right advertisement
 
-GPIO.setup(red, GPIO.OUT)
-GPIO.setup(green, GPIO.OUT)
-GPIO.setup(blue, GPIO.OUT)
+# POST curl command
+""" curl -d '{"color":"magenta", "status":"on", "intensity":60}' -H "Content-Type: application/json" -X POST http://172.29.85.191:5000/LED """
 
-Freq = 100
-RED = GPIO.PWM(red, Freq)
-GREEN = GPIO.PWM(green, Freq)
-BLUE = GPIO.PWM(blue, Freq)
+# GET curl command
+""" curl http://172.29.85.191:5000/LED """
 
-RED.start(100)
-GREEN.start(100)
-BLUE.start(100)
-RED.ChangeDutyCycle(100)
+# GPIO.setmode(GPIO.BCM)
+# GPIO.setwarnings(False)
+#
+# red = 23
+# green = 18
+# blue = 4
+#
+# GPIO.setup(red, GPIO.OUT)
+# GPIO.setup(green, GPIO.OUT)
+# GPIO.setup(blue, GPIO.OUT)
+#
+# Freq = 100
+# RED = GPIO.PWM(red, Freq)
+# GREEN = GPIO.PWM(green, Freq)
+# BLUE = GPIO.PWM(blue, Freq)
+#
+# RED.start(100)
+# GREEN.start(100)
+# BLUE.start(100)
+# RED.ChangeDutyCycle(100)
 
-LED_status = False
+
+LED_status = 'off'
 LED_color = 'red'
-
+LED_intensity = 0
 
 app = Flask(__name__)
 
@@ -49,40 +64,76 @@ def LED():
     if request.method == 'POST':
         data = json.loads(request.data.decode('utf-8'))
         if 'color' in data.keys() and 'status' in data.keys() and 'intensity' in data.keys():
-            LED_color = data['color']
-            LED_status = data['status']
-            if LED_status == 'on':
-            #     GREEN.ChangeDutyCycle(0)
-            #     RED.ChangeDutyCycle(0)
-            #     BLUE.ChangeDutyCycle(0)
-            #     if LED_color == 'red':
-            #         RED.ChangeDutyCycle(100)
-            #     elif LED_color == 'green':
-            #         GREEN.ChangeDutyCycle(100)
-            #     elif LED_color == 'blue':
-            #         BLUE.ChangeDutyCycle(100)
-            #     elif LED_color == 'magenta':
-            #         RED.ChangeDutyCycle(100)
-            #         BLUE.ChangeDutyCycle(100)
-            #     elif LED_color == 'cyan':
-            #         GREEN.ChangeDutyCycle(100)
-            #         BLUE.ChangeDutyCycle(100)
-            #     elif LED_color == 'yellow':
-            #         RED.ChangeDutyCycle(100)
-            #         GREEN.ChangeDutyCycle(100)
-            #     elif LED_color == 'white':
-            #         RED.ChangeDutyCycle(100)
-            #         GREEN.ChangeDutyCycle(100)
-            #         BLUE.ChangeDutyCycle(100)
-            # elif LED_status == 'off':
-            #     GREEN.ChangeDutyCycle(0)
-            #     RED.ChangeDutyCycle(0)
-            #     BLUE.ChangeDutyCycle(0)
-                return 'Color: ' + data['color'] + '\nStatus: ' + data['status'] + '\nIntensity: ' + str(data['intensity']) + '\n'
+            global LED_status
+            global LED_color
+            global LED_intensity
+            if data['status'] == 'on':
+                if data['intensity'] > 100 or data['intensity'] < 0:
+                    return 'Invalid intensity given\n'
+
+                LED_status = 'on'
+
+
+                if data['color'] == 'red':
+                    LED_color = 'Red'
+                elif data['color'] == 'green':
+                    LED_color = 'Green'
+                elif data['color'] == 'blue':
+                    LED_color = 'Blue'
+                elif data['color'] == 'magenta':
+                    LED_color = 'Magenta'
+                elif data['color'] == 'cyan':
+                    LED_color = 'Cyan'
+                elif data['color'] == 'yellow':
+                    LED_color = 'Yellow'
+                elif data['color'] == 'white':
+                    LED_color = 'White'
+                else:
+                    return 'Color not supported\n'
+
+                # GREEN.ChangeDutyCycle(0)
+                # RED.ChangeDutyCycle(0)
+                # BLUE.ChangeDutyCycle(0)
+                # if data['color'] == 'red':
+                #     RED.ChangeDutyCycle(100)
+                #     LED_color = 'Red'
+                # elif data['color'] == 'green':
+                #     GREEN.ChangeDutyCycle(100)
+                #     LED_color = 'Green'
+                # elif data['color'] == 'blue':
+                #     BLUE.ChangeDutyCycle(100)
+                #     LED_color = 'Blue'
+                # elif data['color'] == 'magenta':
+                #     RED.ChangeDutyCycle(100)
+                #     BLUE.ChangeDutyCycle(100)
+                #     LED_color = 'Magenta'
+                # elif data['color'] == 'cyan':
+                #     GREEN.ChangeDutyCycle(100)
+                #     BLUE.ChangeDutyCycle(100)
+                #     LED_color = 'Cyan'
+                # elif data['color'] == 'yellow':
+                #     RED.ChangeDutyCycle(100)
+                #     GREEN.ChangeDutyCycle(100)
+                #     LED_color = 'Yellow'
+                # elif data['color'] == 'white':
+                #     RED.ChangeDutyCycle(100)
+                #     GREEN.ChangeDutyCycle(100)
+                #     BLUE.ChangeDutyCycle(100)
+                #     LED_color = 'White'
+                # else:
+                #     return 'Color not supported\n'
+            elif data['status'] == 'off':
+                LED_status = 'off'
+                # GREEN.ChangeDutyCycle(0)
+                # RED.ChangeDutyCycle(0)
+                # BLUE.ChangeDutyCycle(0)
+            else:
+                return 'Invalid status given\n'
+            return 'CHANGED LED\nColor: ' + data['color'] + '\nStatus: ' + data['status'] + '\nIntensity: ' + str(data['intensity']) + '\n'
         else:
-            return 'Invalid arguments'
+            return 'Invalid arguments\n'
     else:
-        return 'LED status: < Display Here >'
+        return 'LED STATE\nColor: ' + LED_color + '\nStatus: ' + LED_status + '\nIntensity: ' + str(LED_intensity) + '\n'
 
 
 if __name__ == "__main__":
@@ -93,20 +144,26 @@ if __name__ == "__main__":
         assert sys.argv[1:] == ['--debug']
         logging.getLogger('zeroconf').setLevel(logging.DEBUG)
 
-    desc = {'path': '/LED/'}
+    colors = 'red blue green magenta cyan yellow white'
+
+    desc = dict(path='/LED', colors=colors)
 
     info = ServiceInfo("_http._tcp.local.",
-                       "COLINSLED._http._tcp.local.",
-                       socket.inet_aton("127.0.0.1"), 80, 0, 0,
+                       "GROUP13LED._http._tcp.local.",
+                       socket.inet_aton(the_ip), 5000, 0, 0,
                        desc, "ash-2.local.")
+
+    print(type(info.properties['path']))
+
+    print(type(dict(info.properties)['path']))
 
     zeroconf = Zeroconf()
     print("Registration of a service, press Ctrl-C to exit...")
     zeroconf.register_service(info)
 
     # APP
-    try: # 172.29.33.66
-        app.run(host='172.29.85.191', port=5000, debug=True)
+    try:
+        app.run(host=the_ip, port=5000, debug=True)
     except KeyboardInterrupt:
         pass
     finally:
