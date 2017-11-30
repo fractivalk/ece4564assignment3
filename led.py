@@ -51,33 +51,33 @@ def LED():
         LED_color = data['color']
         LED_status = data['status']
         if LED_status == 'on':
-            GREEN.ChangeDutyCycle(0)
-            RED.ChangeDutyCycle(0)
-            BLUE.ChangeDutyCycle(0)
-            if LED_color == 'red':
-                RED.ChangeDutyCycle(100)
-            elif LED_color == 'green':
-                GREEN.ChangeDutyCycle(100)
-            elif LED_color == 'blue':
-                BLUE.ChangeDutyCycle(100)
-            elif LED_color == 'magenta':
-                RED.ChangeDutyCycle(100)
-                BLUE.ChangeDutyCycle(100)
-            elif LED_color == 'cyan':
-                GREEN.ChangeDutyCycle(100)
-                BLUE.ChangeDutyCycle(100)
-            elif LED_color == 'yellow':
-                RED.ChangeDutyCycle(100)
-                GREEN.ChangeDutyCycle(100)
-            elif LED_color == 'white':
-                RED.ChangeDutyCycle(100)
-                GREEN.ChangeDutyCycle(100)
-                BLUE.ChangeDutyCycle(100)
-        elif LED_status == 'off':
-            GREEN.ChangeDutyCycle(0)
-            RED.ChangeDutyCycle(0)
-            BLUE.ChangeDutyCycle(0)
-        return 'Changed LED to: ' + data['color'] + data['status']
+        #     GREEN.ChangeDutyCycle(0)
+        #     RED.ChangeDutyCycle(0)
+        #     BLUE.ChangeDutyCycle(0)
+        #     if LED_color == 'red':
+        #         RED.ChangeDutyCycle(100)
+        #     elif LED_color == 'green':
+        #         GREEN.ChangeDutyCycle(100)
+        #     elif LED_color == 'blue':
+        #         BLUE.ChangeDutyCycle(100)
+        #     elif LED_color == 'magenta':
+        #         RED.ChangeDutyCycle(100)
+        #         BLUE.ChangeDutyCycle(100)
+        #     elif LED_color == 'cyan':
+        #         GREEN.ChangeDutyCycle(100)
+        #         BLUE.ChangeDutyCycle(100)
+        #     elif LED_color == 'yellow':
+        #         RED.ChangeDutyCycle(100)
+        #         GREEN.ChangeDutyCycle(100)
+        #     elif LED_color == 'white':
+        #         RED.ChangeDutyCycle(100)
+        #         GREEN.ChangeDutyCycle(100)
+        #         BLUE.ChangeDutyCycle(100)
+        # elif LED_status == 'off':
+        #     GREEN.ChangeDutyCycle(0)
+        #     RED.ChangeDutyCycle(0)
+        #     BLUE.ChangeDutyCycle(0)
+        return 'Color: ' + data['color'] + '\nStatus: ' + data['status'] + '\nIntensity: ' + data['intensity'] + '\n'
     else:
         return 'LED status: < Display Here >'
 
