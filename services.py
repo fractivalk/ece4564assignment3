@@ -54,10 +54,10 @@ def check_auth(username, password):
 	"""This function is called to check if a username /
 	password combination is valid.
 	"""
-	
+
 	return True if db.service_auth.find({"username":username}, {"password":password}).count() > 0 else False
-	
-		
+
+
 def authenticate():
 	"""Sends a 401 response that enables basic auth"""
 	return Response(
@@ -88,7 +88,7 @@ def canvas():
 	elif request.method == 'GET':
 		file = request.args.get('file')
 		operation = request.args.get('operation')
-	
+
 	if operation == 'upload':
 		# Set up a session
 		session = requests.Session()
@@ -111,7 +111,7 @@ def canvas():
 		r.raise_for_status()
 		r = r.json()
 		return "File \'{}\' successfully posted\n".format(file)
-		
+
 	elif operation == 'download':
 		id = ''
 		for i in requests.get(api_url, params=auth).json():
@@ -121,8 +121,8 @@ def canvas():
 			return 'File \'{}\' not present in remote directory\n'.format(file)
 		urllib.request.urlretrieve(requests.get('{}/{}'.format(api_url, id) , params=auth).json()['url'], file)
 		return 'File \'{}\' downloaded successfully\n'.format(file)
-	
-''' 
+
+'''
 #Get command handling python http method to download from canvas API at group directory
 @app.route("/download/<download_file>", methods=['GET'])
 @requires_auth
@@ -209,15 +209,51 @@ def add_skill(char_name):
 	return jsonify({'char': char[0]})
 	'''
 
+ledip = ""
+""" Listing services available """
+myName =  ""
+class MyListener(object):
 
-@app.route("/LED", methods=['GET'])
+    def remove_service(self, zeroconf, type, name):
+        print("Service %s removed" % (name,))
+
+    def add_service(self, zeroconf, type, name):
+        info = zeroconf.get_service_info(type, name)
+
+        myName = name
+        if str(name) == 'COLINSLED._http._tcp.local.':
+            ip = info.address
+            path= ""
+            prStr = socket.inet_ntoa(ip)
+            #print('Found: ' + str(prStr) + " port: " + str(info.port) + str(info.properties))
+            if info.properties:
+                print(" Properties Are")
+                for key, value in info.properties.items():
+                    print (key.decode('UTF-8'))
+                    if key.decode("UTF-8") == "path":
+                        print ("HI")
+                        path = str(value)
+
+            print('http://' + prStr + ":" + str(info.port) + path)
+
 @requires_auth
+@app.route("/LED", methods=['GET'])
 def led():
-	ledstatus = request.args.get('status')
-	ledcolor = request.args.get('color')
-	ledintensity = request.args.get('intensity')
-	return 'Color: ' + ledcolor + '\nStatus: ' + ledstatus + '\nIntensity: ' + ledintensity + '\n'
+    ledstatus = request.args.get('status')
+    ledcolor = request.args.get('color')
+    ledintensity = request.args.get('intensity')
 
+	# zeroconf = Zeroconf()
+	# listener = MyListener()
+	# browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
+
+    # print(len(request.args))
+
+    # r = requests.get('')
+    #
+    # r = requests.post('', data={'color':ledcolor, 'status':ledstatus, 'intensity':ledintensity})
+
+    return str(len(request.args)) + ' ' + ledstatus + ' ' + ledcolor + ' ' + str(ledintensity) + '\n'
 
 
 if __name__ == "__main__":
