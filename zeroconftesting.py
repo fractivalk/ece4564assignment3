@@ -4,7 +4,7 @@ from zeroconf import ServiceBrowser, Zeroconf
 from zeroconf import ZeroconfServiceTypes
 
 """ Listing services available """
-
+myName =  ""
 class MyListener(object):
 
     def remove_service(self, zeroconf, type, name):
@@ -12,12 +12,15 @@ class MyListener(object):
 
     def add_service(self, zeroconf, type, name):
         info = zeroconf.get_service_info(type, name)
-        print("Service %s added, service info: %s" % (name, info))
+        myName = name
+        if str(name) == 'COLINSLED._http._tcp.local.':
+            print('Found: ' + str(myName))
 
 
 zeroconf = Zeroconf()
 listener = MyListener()
 browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
+print (myName)
 try:
     input("Press enter to exit...\n\n")
 finally:

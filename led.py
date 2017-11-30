@@ -26,9 +26,10 @@ RED = GPIO.PWM(red, Freq)
 GREEN = GPIO.PWM(green, Freq)
 BLUE = GPIO.PWM(blue, Freq)
 
-RED.start(0)
-GREEN.start(0)
-BLUE.start(0)
+RED.start(100)
+GREEN.start(100)
+BLUE.start(100)
+RED.ChangeDutyCycle(100)
 
 LED_status = False
 LED_color = 'red'
@@ -46,7 +47,7 @@ def main():
 @app.route("/LED", methods=['GET', 'POST'])
 def LED():
     if request.method == 'POST':
-        data = json.loads(request.data)
+        data = json.loads(request.data.decode('utf-8'))
         LED_color = data['color']
         LED_status = data['status']
         if LED_status == 'on':
@@ -102,7 +103,7 @@ if __name__ == "__main__":
 
     # APP
     try: # 172.29.33.66
-        app.run(host='172.29.102.146', port=5000, debug=True)
+        app.run(host='172.29.85.191', port=5000, debug=True)
     except KeyboardInterrupt:
         pass
     finally:
