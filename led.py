@@ -77,7 +77,7 @@ def LED():
         #     GREEN.ChangeDutyCycle(0)
         #     RED.ChangeDutyCycle(0)
         #     BLUE.ChangeDutyCycle(0)
-        return 'Color: ' + data['color'] + '\nStatus: ' + data['status'] + '\nIntensity: ' + data['intensity'] + '\n'
+            return 'Color: ' + data['color'] + '\nStatus: ' + data['status'] + '\nIntensity: ' + data['intensity'] + '\n'
     else:
         return 'LED status: < Display Here >'
 
