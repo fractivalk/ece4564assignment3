@@ -187,14 +187,13 @@ def get_char(char_name):
 @app.route("/PartyInfo/AddCharacter", methods=['POST'])
 @requires_auth
 def add_char():
-	print(request.json)
 	char = {
-		'name': request.json['name'],
-		'level': request.json['level'],
-		'class': request.json['class']
+		'name': request.get_json()['name'],
+		'level': request.get_json()['level'],
+		'class': request.get_json()['class']
 	}
 	charSht.append(char)
-	#return jsonify({'char': char}), 201
+	return jsonify({'char': char}), 201
 
 #Post 2
 
