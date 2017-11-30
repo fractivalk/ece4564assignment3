@@ -1,7 +1,7 @@
 import json
 from access_token_code import *
 from flask import Flask, jsonify
-from pymongo import MongoClient
+from pymongo import MongoClient, Connection
 from flask import make_response, request, Response, abort
 from functools import wraps
 import socket
@@ -31,8 +31,9 @@ auth_list = {
 app = Flask(__name__)
 
 #create MongoDB connection
-connection = MongoClient('localhost', 27017)
-db = connection.ufo
+connection = MangoClient('localhost', 27017)
+db = connection['ECE4564_Assignment_3']
+collection = db['service_auth']
 for item in list(auth_list):
     db[item].drop()
 
@@ -142,11 +143,13 @@ def create_upload(upload_file):
 #custom API functionality
 
 #Get 1
+@requires_auth
 @app.route("/PartyInfo", methods=['GET'])
 def fetch_party_info():
     return jsoninfy(charSht)
 
 #Get 2
+@requires_auth
 @app.route('/PartyInfo/<char_name>', methods=['GET'])
 def get_char(char_name):
     char = [char for char in charSht if char['name'] == char_name]
@@ -155,6 +158,7 @@ def get_char(char_name):
     return jsonify({'char': char[0]})
 
 #Post 1
+@requires_auth
 @app.route("PartyInfo/AddCharacter", methods=['POST'])
 def add_char():
     char = {
@@ -166,6 +170,7 @@ def add_char():
     return jsonify({'char': char}), 201
 
 #Post 2
+@requires_auth
 @app.route("PartyInfo/<char_name>/AddSkill", methods=['POST'])
 def add_skill(char_name):
     [char for char in charSht if char['name'] == char_name]['Skill'] = request.data
