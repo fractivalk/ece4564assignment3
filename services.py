@@ -1,7 +1,7 @@
 import json
 from access_token_code import *
 from flask import Flask, jsonify
-from pymongo import MongoClient, Connection
+from pymongo import MongoClient
 from flask import make_response, request, Response, abort
 from functools import wraps
 import socket
@@ -12,7 +12,7 @@ import urllib.request
 
 #curl -u eric:sux -X POST http://172.29.87.247:5000/upload/maxresdefault.jpg
 
-auth_list = {
+auth_list = [
     {
         "username":"apple",
         "password":"pie"
@@ -25,17 +25,17 @@ auth_list = {
         "username":"orange",
         "password":"popsicle"
     }
-}
+]
 
 #flask
 app = Flask(__name__)
 
 #create MongoDB connection
-connection = MangoClient('localhost', 27017)
+connection = MongoClient('localhost', 27017)
 db = connection['ECE4564_Assignment_3']
 collection = db['service_auth']
-for item in list(auth_list):
-    db[item].drop()
+for item in auth_list:
+	db.service_auth.insert_one(item)
 
 
 charSht = [
@@ -126,7 +126,7 @@ def canvas():
         r = requests.post(r['upload_url'], files=payload)
         r.raise_for_status()
         r = r.json()
-        return "File \'{}\' successfully posted\n".format(file
+        return "File \'{}\' successfully posted\n".format(file)
         
     elif request.args.get('operation') == 'download':
         id = ''
@@ -185,7 +185,7 @@ def create_upload(upload_file):
 @requires_auth
 @app.route("/PartyInfo", methods=['GET'])
 def fetch_party_info():
-    return jsoninfy(charSht)
+    return jsonify(charSht)
 
 #Get 2
 @requires_auth
@@ -198,7 +198,7 @@ def get_char(char_name):
 
 #Post 1
 @requires_auth
-@app.route("PartyInfo/AddCharacter", methods=['POST'])
+@app.route("/PartyInfo/AddCharacter", methods=['POST'])
 def add_char():
     char = {
         'name': request.json['name'],
@@ -210,7 +210,7 @@ def add_char():
 
 #Post 2
 @requires_auth
-@app.route("PartyInfo/<char_name>/AddSkill", methods=['POST'])
+@app.route("/PartyInfo/<char_name>/AddSkill", methods=['POST'])
 def add_skill(char_name):
     [char for char in charSht if char['name'] == char_name]['Skill'] = request.data
     char = [char for char in charSht if char['name'] == char_name]
