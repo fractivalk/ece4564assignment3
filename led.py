@@ -54,24 +54,24 @@ def LED():
             RED.ChangeDutyCycle(0)
             BLUE.ChangeDutyCycle(0)
             if LED_color == 'red':
-                RED.ChangeDutyCycle(data['intensity'])
+                RED.ChangeDutyCycle(100)
             elif LED_color == 'green':
-                GREEN.ChangeDutyCycle(data['intensity'])
+                GREEN.ChangeDutyCycle(100)
             elif LED_color == 'blue':
-                BLUE.ChangeDutyCycle(data['intensity'])
+                BLUE.ChangeDutyCycle(100)
             elif LED_color == 'magenta':
-                RED.ChangeDutyCycle(data['intensity'])
-                BLUE.ChangeDutyCycle(data['intensity'])
+                RED.ChangeDutyCycle(100)
+                BLUE.ChangeDutyCycle(100)
             elif LED_color == 'cyan':
-                GREEN.ChangeDutyCycle(data['intensity'])
-                BLUE.ChangeDutyCycle(data['intensity'])
+                GREEN.ChangeDutyCycle(100)
+                BLUE.ChangeDutyCycle(100)
             elif LED_color == 'yellow':
-                RED.ChangeDutyCycle(data['intensity'])
-                GREEN.ChangeDutyCycle(data['intensity'])
+                RED.ChangeDutyCycle(100)
+                GREEN.ChangeDutyCycle(100)
             elif LED_color == 'white':
-                RED.ChangeDutyCycle(data['intensity'])
-                GREEN.ChangeDutyCycle(data['intensity'])
-                BLUE.ChangeDutyCycle(data['intensity'])
+                RED.ChangeDutyCycle(100)
+                GREEN.ChangeDutyCycle(100)
+                BLUE.ChangeDutyCycle(100)
         elif LED_status == 'off':
             GREEN.ChangeDutyCycle(0)
             RED.ChangeDutyCycle(0)
