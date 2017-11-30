@@ -1,37 +1,46 @@
 import json
+from access_token_code import *
 from flask import Flask, jsonify
 from pymongo import MongoClient
 from flask import make_response, request, Response, abort
 from functools import wraps
 import socket
 
-auth = {'access_token':'4511~N31cAx15APjv7QDgwYtY0jIyv7R8bBetGgJFIn0kql3cb4IQjpOyVKPgctxn813C'}
 import requests
 import json
 import urllib.request
 
-#online example, creates server on ip and returns Hello World
+#curl -u eric:sux -X POST http://172.29.87.247:5000/upload/maxresdefault.jpg
+
 
 #flask
 app = Flask(__name__)
 
 #create MongoDB connection
-connection = Connection('localhost', 27017)
+connection = MongoClient('localhost', 27017)
 db = connection.ufo
-#connection = MongoClient('localhost', 27017)
-#db = connection.ufo
 
-example1 = [
+charSht = [
     {
-        'id': 1,
-        'name': u'Nick',
-        'level': u'user'
+        'name': u'Nick the Nub',
+        'level': 999,
+		'class': u'Rogue'
     },
     {
-        'id': 2,
-        'name': u'Eric',
-        'level': u'scrub'
+        'name': u'Eric the Error',
+        'level': 69,
+		'class': u'Senior Scrub'
     },
+	{
+		'name': u'Colin the Conqueror',
+		'level': 999,
+		'class': u'Warrior'
+	},
+	{
+		'name': u'Wes the Wise',
+		'level': 999,
+		'class': u'Mage'
+	}
 
 ]
 
@@ -57,19 +66,19 @@ def requires_auth(f):
             return authenticate()
         return f(*args, **kwargs)
     return decorated
-
+	
 #Get command handling python http method to download from canvas API at group directory
 @app.route("/download/<download_file>", methods=['GET'])
 @requires_auth
 def get_download(download_file):
     id = ''
-    for i in requests.get('https://vt.instructure.com/api/v1/groups/46547/files/', params=auth).json():
+    for i in requests.get(api_url, params=auth).json():
         if i['filename'] == download_file:
             id = i['id']
     if id == '':
         return 'File \'{}\' not present in remote directory\n'.format(download_file)
-    urllib.request.urlretrieve(requests.get('https://vt.instructure.com/api/v1/groups/46547/files/{}'.format(id) , params=auth).json()['url'], download_file)
-    return 'Download successful\n'
+    urllib.request.urlretrieve(requests.get('{}/{}'.format(api_url, id) , params=auth).json()['url'], download_file)
+    return 'File \'{}\' downloaded successfully\n'.format(download_file)
 
 @app.route("/", methods =['GET'])
 @requires_auth
@@ -77,10 +86,30 @@ def get_example1():
     return "This is the root directory. Why are you here?"
 
 @app.route("/upload/<upload_file>", methods =['POST'])
-@requires_auth
+@requires_auth    
 def create_upload(upload_file):
-    #Placeholder: This should send a python http request to the canvas API to upload the specified file to the group directory.
-    return "Successfully Posted"
+    # Set up a session
+    session = requests.Session()
+    session.headers = {'Authorization': 'Bearer %s' % auth['access_token']}
+
+    # Step 1 - tell Canvas you want to upload a file
+    payload = {}
+    payload['name'] = upload_file
+    payload['parent_folder_path'] = '/'
+    r = session.post(api_url, data=payload)
+    r.raise_for_status()
+    r = r.json()
+
+    # Step 2 - upload file
+    payload = list(r['upload_params'].items()) # Note this is now a list of tuples
+    with open(upload_file, 'rb') as f:
+        file_content = f.read()
+    payload.append((u'file', file_content)) # Append file at the end of list of tuples
+    r = requests.post(r['upload_url'], files=payload)
+    r.raise_for_status() 
+    r = r.json()
+   
+    return "File \'{}\' successfully posted\n".format(upload_file)
 
 
 if __name__ == "__main__":
