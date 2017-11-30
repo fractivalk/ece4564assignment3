@@ -12,6 +12,20 @@ import urllib.request
 
 #curl -u eric:sux -X POST http://172.29.87.247:5000/upload/maxresdefault.jpg
 
+auth_list = {
+    {
+        "username":"apple",
+        "password":"pie"
+    },
+    {
+        "username":"banana",
+        "password":"cake"
+    },
+    {
+        "username":"orange",
+        "password":"popsicle"
+    }
+}
 
 #flask
 app = Flask(__name__)
@@ -19,6 +33,9 @@ app = Flask(__name__)
 #create MongoDB connection
 connection = MongoClient('localhost', 27017)
 db = connection.ufo
+for item in list(auth_list):
+    db[item].drop()
+
 
 charSht = [
     {
@@ -49,7 +66,18 @@ def check_auth(username, password):
     password combination is valid.
     """
 
-    return username == 'eric' and password == 'sux'
+    valid = False
+    temp = {
+        "username":username,
+        "password":password
+    }
+    for entry in db:
+        if entry == temp:
+            valid = True
+
+
+
+    return valid
 
 def authenticate():
     """Sends a 401 response that enables basic auth"""
