@@ -9,7 +9,7 @@ from zeroconf import ServiceInfo, Zeroconf
 # import RPi.GPIO as GPIO
 import json
 
-the_ip = "172.29.102.146"
+the_ip = "192.168.1.20"
 
 
 # GPIO LEDs
@@ -19,7 +19,7 @@ the_ip = "172.29.102.146"
 # Services integration and browsing for right advertisement
 
 # POST curl command
-""" curl -d '{"color":"magenta", "status":"on", "intensity":60}' -H "Content-Type: application/json" -X POST http://172.29.85.191:5000/LED """
+""" curl -d '{"color":"magenta", "status":"on", "intensity":"60"}' -H "Content-Type: application/json" -X POST http://172.29.85.191:5000/LED """
 
 # GET curl command
 """ curl http://172.29.85.191:5000/LED """
@@ -48,7 +48,7 @@ the_ip = "172.29.102.146"
 
 LED_status = 'off'
 LED_color = 'red'
-LED_intensity = 0
+LED_intensity = '0'
 
 app = Flask(__name__)
 
@@ -62,13 +62,13 @@ def main():
 @app.route("/LED", methods=['GET', 'POST'])
 def LED():
     if request.method == 'POST':
-        data = json.loads(request.data.decode('utf-8'))
+        data = json.loads(request.data)
         if 'color' in data.keys() and 'status' in data.keys() and 'intensity' in data.keys():
             global LED_status
             global LED_color
             global LED_intensity
             if data['status'] == 'on':
-                if data['intensity'] > 100 or data['intensity'] < 0:
+                if int(data['intensity']) > 100 or int(data['intensity']) < 0:
                     return 'Invalid intensity given\n'
 
                 LED_status = 'on'
@@ -129,6 +129,7 @@ def LED():
                 # BLUE.ChangeDutyCycle(0)
             else:
                 return 'Invalid status given\n'
+            LED_intensity = int(data['intensity'])
             return 'CHANGED LED\nColor: ' + data['color'] + '\nStatus: ' + data['status'] + '\nIntensity: ' + str(data['intensity']) + '\n'
         else:
             return 'Invalid arguments\n'
@@ -152,10 +153,6 @@ if __name__ == "__main__":
                        "GROUP13LED._http._tcp.local.",
                        socket.inet_aton(the_ip), 5000, 0, 0,
                        desc, "ash-2.local.")
-
-    print(type(info.properties['path']))
-
-    print(type(dict(info.properties)['path']))
 
     zeroconf = Zeroconf()
     print("Registration of a service, press Ctrl-C to exit...")
