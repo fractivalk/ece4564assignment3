@@ -221,7 +221,7 @@ class MyListener(object):
         info = zeroconf.get_service_info(type, name)
 
         myName = name
-        if str(name) == 'COLINSLED._http._tcp.local.':
+        if str(name) == 'GROUP13LED._http._tcp.local.':
             ip = info.address
             path= ""
             prStr = socket.inet_ntoa(ip)
@@ -239,21 +239,32 @@ class MyListener(object):
 @requires_auth
 @app.route("/LED", methods=['GET'])
 def led():
-    ledstatus = request.args.get('status')
-    ledcolor = request.args.get('color')
-    ledintensity = request.args.get('intensity')
+
+	if str(len(request.args)) == 3:
+	    ledstatus = request.args.get('status')
+	    ledcolor = request.args.get('color')
+	    ledintensity = request.args.get('intensity')
+        # Look for service with Zeroconf
+
+		# connect to service with Requests library and send POST
+		r = requests.post('http://192.168.1.20:5000/LED', data={'color':ledcolor, 'status':ledstatus, 'intensity':ledintensity})
+		return r.text
+		# return str(len(request.args)) + ' ' + ledstatus + ' ' + ledcolor + ' ' + str(ledintensity) + '\n'
+
+	elif str(len(request.args)) == 0:
+		# Look for service with Zeroconf
+
+		# connect to service with Requests library and send GET
+		r = requests.get('http://192.168.1.20:5000/LED')
+		return r.text
+	else:
+		return 'Invalid arguments\n'
+
 
 	# zeroconf = Zeroconf()
 	# listener = MyListener()
 	# browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
 
-    # print(len(request.args))
-
-    # r = requests.get('')
-    #
-    # r = requests.post('', data={'color':ledcolor, 'status':ledstatus, 'intensity':ledintensity})
-
-    return str(len(request.args)) + ' ' + ledstatus + ' ' + ledcolor + ' ' + str(ledintensity) + '\n'
 
 
 if __name__ == "__main__":
