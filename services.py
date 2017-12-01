@@ -12,7 +12,53 @@ import requests
 import json
 import urllib.request
 
-#curl -u eric:sux -X POST http://172.29.87.247:5000/upload/maxresdefault.jpg
+""" Listing services available """
+myName =  ""
+class MyListener(object):
+	prStr = ""
+	path = ""
+	colors = ""
+	port = ""
+	found = False
+	def remove_service(self, zeroconf, type, name):
+		print("Service %s removed" % (name,))
+
+	def add_service(self, zeroconf, type, name):
+		info = zeroconf.get_service_info(type, name)
+		myName = name
+		if str(name) == 'GROUP13LED._http._tcp.local.':
+			print('found GROUP13LED')
+			ip = info.address
+			self.prStr = str(socket.inet_ntoa(ip))
+			self.found = True
+			self.port = str(info.port)
+
+			if info.properties:
+				for key, value in info.properties.items():
+					if key.decode("UTF-8") == "path":
+						self.path = str(value)[2:-1]
+					if key.decode("UTF-8") == "colors":
+						self.colors = str(value)
+		
+	def get_prStr(self):
+		return self.prStr
+		
+	def get_path(self):
+		return self.path
+		
+	def get_colors(self):
+		return self.colors
+		
+	def get_port(self):
+		return self.port
+		
+	def get_found(self):
+		return self.found
+
+# Look for service with Zeroconf
+zeroconf = Zeroconf()
+listener = MyListener()
+browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
 
 
 
@@ -170,60 +216,20 @@ def add_skill(char_name):
 			
 	return "Invalid Character Name"
 
-
-""" Listing services available """
-myName =  ""
-prStr = ""
-path = ""
-colors = ""
-port = ""
-found = False
-class MyListener(object):
-	global prStr
-	global path
-	global colors
-	global port
-	global found
-	def remove_service(self, zeroconf, type, name):
-		print("Service %s removed" % (name,))
-
-	def add_service(self, zeroconf, type, name):
-		info = zeroconf.get_service_info(type, name)
-
-		myName = name
-		if str(name) == 'GROUP13LED._http._tcp.local.':
-			print('found GROUP13LED')
-			ip = info.address
-			prStr = str(socket.inet_ntoa(ip))
-			found = True
-			port = str(info.port)
-			print("there")
-			if info.properties:
-				for key, value in info.properties.items():
-					if key.decode("UTF-8") == "path":
-						path = str(value)
-					if key.decode("UTF-8") == "colors":
-						colors = str(value)
-
 						
 @requires_auth
 @app.route("/LED", methods=['GET'])
 def led():
-	global prStr
-	global path
-	global colors
-	global port
-	global found
-	print(len(request.args))
+	global listener
 	if len(request.args) == 3:
 		ledstatus = request.args.get('status')
 		ledcolor = request.args.get('color')
 		ledintensity = request.args.get('intensity')
-		# Look for service with Zeroconf
+		
 		# connect to service with Requests library and send POST
 		headers = {'content-type':'application/json'}
 		data1={'color':ledcolor, 'status':ledstatus, 'intensity':ledintensity}
-		theip = 'http://' + prStr + ':' + port + path
+		theip = 'http://' + listener.get_prStr() + ':' + listener.get_port() + listener.get_path()
 		print(theip)
 		r = requests.post(theip, data=json.dumps(data1), headers=headers) # 'http://192.168.1.22:5000/LED'
 		return r.text
@@ -246,9 +252,6 @@ def led():
 
 
 if __name__ == "__main__":
-	zeroconf = Zeroconf()
-	listener = MyListener()
-	browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	s.connect(("8.8.8.8", 80))
 	ip = s.getsockname()[0]
