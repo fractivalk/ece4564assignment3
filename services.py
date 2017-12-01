@@ -200,13 +200,13 @@ def add_char():
 @app.route("/PartyInfo/<char_name>/AddSkill", methods=['POST'])
 @requires_auth
 def add_skill(char_name):
-	'''
-	[char for char in charSht if char['name'] == char_name]['Skill'] = request.data
-	char = [char for char in charSht if char['name'] == char_name]
-	if len(char) == 0:
-		abort(404)
-	return jsonify({'char': char[0]})
-	'''
+	for item in charSht:
+		if item['name'] == char_name:
+			print(request.form.get('skill'))
+			item['skill'] = request.form.get('skill')
+			return "Successfully Added Skill"
+			
+	return "Invalid Character Name"
 
 ledip = ""
 """ Listing services available """
@@ -260,5 +260,4 @@ if __name__ == "__main__":
 	s.connect(("8.8.8.8", 80))
 	ip = s.getsockname()[0]
 	s.close()
-	print(ip)
 	app.run(host = str(ip), port=5000, debug=True) #IP is based of current pi being used, 5000 is Flask DP
