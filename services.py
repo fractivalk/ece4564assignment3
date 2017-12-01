@@ -3,6 +3,7 @@ from access_token_code import *
 from flask import Flask, jsonify
 from pymongo import MongoClient
 from flask import make_response, request, Response, abort
+from flask_discoverer import Discoverer, advertise
 from functools import wraps
 import socket
 
@@ -16,6 +17,7 @@ import urllib.request
 
 #flask
 app = Flask(__name__)
+discoverer = Discoverer(app)
 
 #create MongoDB connection
 connection = MongoClient('localhost', 27017)
@@ -196,6 +198,7 @@ class MyListener(object):
 			print('http://' + prStr + ":" + str(info.port) + path)
 
 @requires_auth
+@advertise(status=["on","off"], colors=["red","green","blue","magenta","cyan","yellow","white"],intensity="[0-100]")
 @app.route("/LED", methods=['GET'])
 def led():
 	print(len(request.args))
