@@ -38,3 +38,14 @@ Example download:
     curl -u username:password "ipaddress:5000/Canvas?file=<file_name>&operation=download"
 Example upload (upload file must be in same directory as services.py)
     curl -u username:password "ipaddress:5000/Canvas?file=<file_name>&operation=download"
+
+Breadboard and GPIO setup:
+Red = pin 23
+Green = pin 18
+Blue = pin 4
+
+-connect corresponging LED lead to its GPIO pin number with the longest lead grounded.
+
+Zeroconf:
+led.py advertises the server as "GROUP13LED._http._tcp.local." at default port 5000 with route "/LED"
+Parameters advertised are "path" and "colors"
