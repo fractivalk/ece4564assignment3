@@ -6,14 +6,59 @@ from flask import make_response, request, Response, abort
 from flask_discoverer import Discoverer, advertise
 from functools import wraps
 import socket
+import time
+from zeroconf import ServiceInfo, Zeroconf, ServiceBrowser
 
 import requests
 import json
 import urllib.request
 
-#curl -u eric:sux -X POST http://172.29.87.247:5000/upload/maxresdefault.jpg
+""" Listing services available """
+myName =  ""
+class MyListener(object):
+	prStr = ""
+	path = ""
+	colors = ""
+	port = ""
+	found = False
+	def remove_service(self, zeroconf, type, name):
+		print("Service %s removed" % (name,))
 
+	def add_service(self, zeroconf, type, name):
+		info = zeroconf.get_service_info(type, name)
+		myName = name
+		if str(name) == 'GROUP13LED._http._tcp.local.':
+			ip = info.address
+			self.prStr = str(socket.inet_ntoa(ip))
+			self.found = True
+			self.port = str(info.port)
 
+			if info.properties:
+				for key, value in info.properties.items():
+					if key.decode("UTF-8") == "path":
+						self.path = str(value)[2:-1]
+					if key.decode("UTF-8") == "colors":
+						self.colors = str(value)
+		
+	def get_prStr(self):
+		return self.prStr
+		
+	def get_path(self):
+		return self.path
+		
+	def get_colors(self):
+		return self.colors
+		
+	def get_port(self):
+		return self.port
+		
+	def get_found(self):
+		return self.found
+
+# Look for service with Zeroconf
+zeroconf = Zeroconf()
+listener = MyListener()
+browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
 
 #flask
 app = Flask(__name__)
@@ -164,73 +209,39 @@ def add_char():
 def add_skill(char_name):
 	for item in charSht:
 		if item['name'] == char_name:
-			print(request.form.get('skill'))
 			item['skill'] = request.form.get('skill')
 			return "Successfully Added Skill"
 			
 	return "Invalid Character Name"
 
-ledip = ""
-""" Listing services available """
-myName =  ""
-class MyListener(object):
-
-	def remove_service(self, zeroconf, type, name):
-		print("Service %s removed" % (name,))
-
-	def add_service(self, zeroconf, type, name):
-		info = zeroconf.get_service_info(type, name)
-
-		myName = name
-		if str(name) == 'GROUP13LED._http._tcp.local.':
-			ip = info.address
-			path= ""
-			prStr = socket.inet_ntoa(ip)
-			#print('Found: ' + str(prStr) + " port: " + str(info.port) + str(info.properties))
-			if info.properties:
-				print(" Properties Are")
-				for key, value in info.properties.items():
-					print (key.decode('UTF-8'))
-					if key.decode("UTF-8") == "path":
-						print ("HI")
-						path = str(value)
-
-			print('http://' + prStr + ":" + str(info.port) + path)
-
+						
 @requires_auth
 @advertise(status=["on","off"], colors=["red","green","blue","magenta","cyan","yellow","white"],intensity="[0-100]")
 @app.route("/LED", methods=['GET'])
 def led():
-	print(len(request.args))
+	global listener
+	theip = 'http://' + listener.get_prStr() + ':' + listener.get_port() + listener.get_path()
+	if not theip:
+		print("LED service not found")
+		return
 	if len(request.args) == 3:
 		ledstatus = request.args.get('status')
 		ledcolor = request.args.get('color')
 		ledintensity = request.args.get('intensity')
-		# Look for service with Zeroconf
-
+		
 		# connect to service with Requests library and send POST
 		headers = {'content-type':'application/json'}
-		data={'color':ledcolor, 'status':ledstatus, 'intensity':ledintensity}
-		
-		r = requests.post('http://192.168.1.20:5000/LED', data=json.dumps(data), headers=headers)
+		data1={'color':ledcolor, 'status':ledstatus, 'intensity':ledintensity}
+		r = requests.post(theip, data=json.dumps(data1), headers=headers) # 'http://192.168.1.22:5000/LED'
 		return r.text
-		# return str(len(request.args)) + ' ' + ledstatus + ' ' + ledcolor + ' ' + str(ledintensity) + '\n'
 
 	elif len(request.args) == 0:
 		# Look for service with Zeroconf
-
 		# connect to service with Requests library and send GET
-		r = requests.get('http://192.168.1.20:5000/LED')
+		r = requests.get(theip) # 'http://192.168.1.22:5000/LED'
 		return r.text
 	else:
 		return 'Invalid arguments\n'
-
-
-	# zeroconf = Zeroconf()
-	# listener = MyListener()
-	# browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
-
-
 
 if __name__ == "__main__":
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

@@ -6,10 +6,10 @@ import socket
 import sys
 from time import sleep
 from zeroconf import ServiceInfo, Zeroconf
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import json
 
-the_ip = "192.168.1.20"
+the_ip = "192.168.1.22"
 
 
 # GPIO LEDs
@@ -24,26 +24,25 @@ the_ip = "192.168.1.20"
 # GET curl command
 """ curl http://172.29.85.191:5000/LED """
 
-# GPIO.setmode(GPIO.BCM)
-# GPIO.setwarnings(False)
-#
-# red = 23
-# green = 18
-# blue = 4
-#
-# GPIO.setup(red, GPIO.OUT)
-# GPIO.setup(green, GPIO.OUT)
-# GPIO.setup(blue, GPIO.OUT)
-#
-# Freq = 100
-# RED = GPIO.PWM(red, Freq)
-# GREEN = GPIO.PWM(green, Freq)
-# BLUE = GPIO.PWM(blue, Freq)
-#
-# RED.start(100)
-# GREEN.start(100)
-# BLUE.start(100)
-# RED.ChangeDutyCycle(100)
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+
+red = 4
+green = 18
+blue = 23
+
+GPIO.setup(red, GPIO.OUT)
+GPIO.setup(green, GPIO.OUT)
+GPIO.setup(blue, GPIO.OUT)
+
+Freq = 100
+RED = GPIO.PWM(red, Freq)
+GREEN = GPIO.PWM(green, Freq)
+BLUE = GPIO.PWM(blue, Freq)
+
+RED.start(100)
+GREEN.start(0)
+BLUE.start(0)
 
 
 LED_status = 'off'
@@ -58,11 +57,10 @@ def main():
     # return render_template('main.html')
     return "Hello World!"
 
-
 @app.route("/LED", methods=['GET', 'POST'])
 def LED():
     if request.method == 'POST':
-        data = json.loads(request.data)
+        data = json.loads(request.data.decode('utf-8'))
         if 'color' in data.keys() and 'status' in data.keys() and 'intensity' in data.keys():
             global LED_status
             global LED_color
@@ -70,63 +68,44 @@ def LED():
             if data['status'] == 'on':
                 if int(data['intensity']) > 100 or int(data['intensity']) < 0:
                     return 'Invalid intensity given\n'
-
                 LED_status = 'on'
 
-
+                GREEN.ChangeDutyCycle(0)
+                RED.ChangeDutyCycle(0)
+                BLUE.ChangeDutyCycle(0)
                 if data['color'] == 'red':
+                    RED.ChangeDutyCycle(100)
                     LED_color = 'Red'
                 elif data['color'] == 'green':
+                    GREEN.ChangeDutyCycle(100)
                     LED_color = 'Green'
                 elif data['color'] == 'blue':
+                    BLUE.ChangeDutyCycle(100)
                     LED_color = 'Blue'
                 elif data['color'] == 'magenta':
+                    RED.ChangeDutyCycle(100)
+                    BLUE.ChangeDutyCycle(100)
                     LED_color = 'Magenta'
                 elif data['color'] == 'cyan':
+                    GREEN.ChangeDutyCycle(100)
+                    BLUE.ChangeDutyCycle(100)
                     LED_color = 'Cyan'
                 elif data['color'] == 'yellow':
+                    RED.ChangeDutyCycle(100)
+                    GREEN.ChangeDutyCycle(100)
                     LED_color = 'Yellow'
                 elif data['color'] == 'white':
+                    RED.ChangeDutyCycle(100)
+                    GREEN.ChangeDutyCycle(100)
+                    BLUE.ChangeDutyCycle(100)
                     LED_color = 'White'
                 else:
                     return 'Color not supported\n'
-
-                # GREEN.ChangeDutyCycle(0)
-                # RED.ChangeDutyCycle(0)
-                # BLUE.ChangeDutyCycle(0)
-                # if data['color'] == 'red':
-                #     RED.ChangeDutyCycle(100)
-                #     LED_color = 'Red'
-                # elif data['color'] == 'green':
-                #     GREEN.ChangeDutyCycle(100)
-                #     LED_color = 'Green'
-                # elif data['color'] == 'blue':
-                #     BLUE.ChangeDutyCycle(100)
-                #     LED_color = 'Blue'
-                # elif data['color'] == 'magenta':
-                #     RED.ChangeDutyCycle(100)
-                #     BLUE.ChangeDutyCycle(100)
-                #     LED_color = 'Magenta'
-                # elif data['color'] == 'cyan':
-                #     GREEN.ChangeDutyCycle(100)
-                #     BLUE.ChangeDutyCycle(100)
-                #     LED_color = 'Cyan'
-                # elif data['color'] == 'yellow':
-                #     RED.ChangeDutyCycle(100)
-                #     GREEN.ChangeDutyCycle(100)
-                #     LED_color = 'Yellow'
-                # elif data['color'] == 'white':
-                #     RED.ChangeDutyCycle(100)
-                #     GREEN.ChangeDutyCycle(100)
-                #     BLUE.ChangeDutyCycle(100)
-                #     LED_color = 'White'
-                # else:
-                #     return 'Color not supported\n'
             elif data['status'] == 'off':
                 LED_status = 'off'
-                # GREEN.ChangeDutyCycle(0)
-                # RED.ChangeDutyCycle(0)
-                # BLUE.ChangeDutyCycle(0)
+                GREEN.ChangeDutyCycle(0)
+                RED.ChangeDutyCycle(0)
+                BLUE.ChangeDutyCycle(0)
             else:
                 return 'Invalid status given\n'
             LED_intensity = int(data['intensity'])
