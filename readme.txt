@@ -31,7 +31,7 @@ Example curl commands for custom API (4 Total - 2 GET, 2 POST)
     \(only for windows)
     
 /PartyInfo/<char_name>/AddSkill (POST)
-    curl -u username:password -F {'skill':'nameofskill' -X POST "ipaddress:5000/char_name/AddSkill"
+    curl -u username:password -F "skill=nameofskill" -X POST "ipaddress:5000/char_name/AddSkill"
     
 Canvas Upload and Download operates as specified in the documentation (handles both GET and POST requests)
 Example download:
