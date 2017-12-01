@@ -27,7 +27,6 @@ class MyListener(object):
 		info = zeroconf.get_service_info(type, name)
 		myName = name
 		if str(name) == 'GROUP13LED._http._tcp.local.':
-			print('found GROUP13LED')
 			ip = info.address
 			self.prStr = str(socket.inet_ntoa(ip))
 			self.found = True
@@ -59,8 +58,6 @@ class MyListener(object):
 zeroconf = Zeroconf()
 listener = MyListener()
 browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
-
-
 
 #flask
 app = Flask(__name__)
@@ -210,7 +207,6 @@ def add_char():
 def add_skill(char_name):
 	for item in charSht:
 		if item['name'] == char_name:
-			print(request.form.get('skill'))
 			item['skill'] = request.form.get('skill')
 			return "Successfully Added Skill"
 			
@@ -221,6 +217,10 @@ def add_skill(char_name):
 @app.route("/LED", methods=['GET'])
 def led():
 	global listener
+	theip = 'http://' + listener.get_prStr() + ':' + listener.get_port() + listener.get_path()
+	if not theip:
+		print("LED service not found")
+		return
 	if len(request.args) == 3:
 		ledstatus = request.args.get('status')
 		ledcolor = request.args.get('color')
@@ -229,27 +229,16 @@ def led():
 		# connect to service with Requests library and send POST
 		headers = {'content-type':'application/json'}
 		data1={'color':ledcolor, 'status':ledstatus, 'intensity':ledintensity}
-		theip = 'http://' + listener.get_prStr() + ':' + listener.get_port() + listener.get_path()
-		print(theip)
 		r = requests.post(theip, data=json.dumps(data1), headers=headers) # 'http://192.168.1.22:5000/LED'
 		return r.text
-		# return str(len(request.args)) + ' ' + ledstatus + ' ' + ledcolor + ' ' + str(ledintensity) + '\n'
 
 	elif len(request.args) == 0:
 		# Look for service with Zeroconf
-		theip = 'http://' + prStr + ':' + port + path
 		# connect to service with Requests library and send GET
 		r = requests.get(theip) # 'http://192.168.1.22:5000/LED'
 		return r.text
 	else:
 		return 'Invalid arguments\n'
-
-
-	# zeroconf = Zeroconf()
-	# listener = MyListener()
-	# browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
-
-
 
 if __name__ == "__main__":
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
