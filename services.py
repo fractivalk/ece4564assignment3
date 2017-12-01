@@ -5,12 +5,60 @@ from pymongo import MongoClient
 from flask import make_response, request, Response, abort
 from functools import wraps
 import socket
+import time
+from zeroconf import ServiceInfo, Zeroconf, ServiceBrowser
 
 import requests
 import json
 import urllib.request
 
-#curl -u eric:sux -X POST http://172.29.87.247:5000/upload/maxresdefault.jpg
+""" Listing services available """
+myName =  ""
+class MyListener(object):
+	prStr = ""
+	path = ""
+	colors = ""
+	port = ""
+	found = False
+	def remove_service(self, zeroconf, type, name):
+		print("Service %s removed" % (name,))
+
+	def add_service(self, zeroconf, type, name):
+		info = zeroconf.get_service_info(type, name)
+		myName = name
+		if str(name) == 'GROUP13LED._http._tcp.local.':
+			print('found GROUP13LED')
+			ip = info.address
+			self.prStr = str(socket.inet_ntoa(ip))
+			self.found = True
+			self.port = str(info.port)
+
+			if info.properties:
+				for key, value in info.properties.items():
+					if key.decode("UTF-8") == "path":
+						self.path = str(value)[2:-1]
+					if key.decode("UTF-8") == "colors":
+						self.colors = str(value)
+		
+	def get_prStr(self):
+		return self.prStr
+		
+	def get_path(self):
+		return self.path
+		
+	def get_colors(self):
+		return self.colors
+		
+	def get_port(self):
+		return self.port
+		
+	def get_found(self):
+		return self.found
+
+# Look for service with Zeroconf
+zeroconf = Zeroconf()
+listener = MyListener()
+browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
 
 
 
@@ -122,46 +170,6 @@ def canvas():
 		urllib.request.urlretrieve(requests.get('{}/{}'.format(api_url, id) , params=auth).json()['url'], file)
 		return 'File \'{}\' downloaded successfully\n'.format(file)
 
-'''
-#Get command handling python http method to download from canvas API at group directory
-@app.route("/download/<download_file>", methods=['GET'])
-@requires_auth
-def get_download(download_file):
-	id = ''
-	for i in requests.get(api_url, params=auth).json():
-		if i['filename'] == download_file:
-			id = i['id']
-	if id == '':
-		return 'File \'{}\' not present in remote directory\n'.format(download_file)
-	urllib.request.urlretrieve(requests.get('{}/{}'.format(api_url, id) , params=auth).json()['url'], download_file)
-	return 'File \'{}\' downloaded successfully\n'.format(download_file)
-
-@app.route("/upload/<upload_file>", methods =['POST'])
-@requires_auth
-def create_upload(upload_file):
-	# Set up a session
-	session = requests.Session()
-	session.headers = {'Authorization': 'Bearer %s' % auth['access_token']}
-
-	# Step 1 - tell Canvas you want to upload a file
-	payload = {}
-	payload['name'] = upload_file
-	payload['parent_folder_path'] = '/'
-	r = session.post(api_url, data=payload)
-	r.raise_for_status()
-	r = r.json()
-
-	# Step 2 - upload file
-	payload = list(r['upload_params'].items()) # Note this is now a list of tuples
-	with open(upload_file, 'rb') as f:
-		file_content = f.read()
-	payload.append((u'file', file_content)) # Append file at the end of list of tuples
-	r = requests.post(r['upload_url'], files=payload)
-	r.raise_for_status()
-	r = r.json()
-
-	return "File \'{}\' successfully posted\n".format(upload_file)
-'''
 
 #custom API functionality
 
@@ -208,53 +216,30 @@ def add_skill(char_name):
 			
 	return "Invalid Character Name"
 
-ledip = ""
-""" Listing services available """
-myName =  ""
-class MyListener(object):
-
-    def remove_service(self, zeroconf, type, name):
-        print("Service %s removed" % (name,))
-
-    def add_service(self, zeroconf, type, name):
-        info = zeroconf.get_service_info(type, name)
-
-        myName = name
-        if str(name) == 'GROUP13LED._http._tcp.local.':
-            ip = info.address
-            path= ""
-            prStr = socket.inet_ntoa(ip)
-            #print('Found: ' + str(prStr) + " port: " + str(info.port) + str(info.properties))
-            if info.properties:
-                print(" Properties Are")
-                for key, value in info.properties.items():
-                    print (key.decode('UTF-8'))
-                    if key.decode("UTF-8") == "path":
-                        print ("HI")
-                        path = str(value)
-
-            print('http://' + prStr + ":" + str(info.port) + path)
-
+						
 @requires_auth
 @app.route("/LED", methods=['GET'])
 def led():
-
-	if str(len(request.args)) == 3:
-	    ledstatus = request.args.get('status')
-	    ledcolor = request.args.get('color')
-	    ledintensity = request.args.get('intensity')
-        # Look for service with Zeroconf
-
+	global listener
+	if len(request.args) == 3:
+		ledstatus = request.args.get('status')
+		ledcolor = request.args.get('color')
+		ledintensity = request.args.get('intensity')
+		
 		# connect to service with Requests library and send POST
-		r = requests.post('http://192.168.1.20:5000/LED', data={'color':ledcolor, 'status':ledstatus, 'intensity':ledintensity})
+		headers = {'content-type':'application/json'}
+		data1={'color':ledcolor, 'status':ledstatus, 'intensity':ledintensity}
+		theip = 'http://' + listener.get_prStr() + ':' + listener.get_port() + listener.get_path()
+		print(theip)
+		r = requests.post(theip, data=json.dumps(data1), headers=headers) # 'http://192.168.1.22:5000/LED'
 		return r.text
 		# return str(len(request.args)) + ' ' + ledstatus + ' ' + ledcolor + ' ' + str(ledintensity) + '\n'
 
-	elif str(len(request.args)) == 0:
+	elif len(request.args) == 0:
 		# Look for service with Zeroconf
-
+		theip = 'http://' + prStr + ':' + port + path
 		# connect to service with Requests library and send GET
-		r = requests.get('http://192.168.1.20:5000/LED')
+		r = requests.get(theip) # 'http://192.168.1.22:5000/LED'
 		return r.text
 	else:
 		return 'Invalid arguments\n'
