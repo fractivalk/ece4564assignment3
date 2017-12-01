@@ -213,44 +213,47 @@ ledip = ""
 myName =  ""
 class MyListener(object):
 
-    def remove_service(self, zeroconf, type, name):
-        print("Service %s removed" % (name,))
+	def remove_service(self, zeroconf, type, name):
+		print("Service %s removed" % (name,))
 
-    def add_service(self, zeroconf, type, name):
-        info = zeroconf.get_service_info(type, name)
+	def add_service(self, zeroconf, type, name):
+		info = zeroconf.get_service_info(type, name)
 
-        myName = name
-        if str(name) == 'GROUP13LED._http._tcp.local.':
-            ip = info.address
-            path= ""
-            prStr = socket.inet_ntoa(ip)
-            #print('Found: ' + str(prStr) + " port: " + str(info.port) + str(info.properties))
-            if info.properties:
-                print(" Properties Are")
-                for key, value in info.properties.items():
-                    print (key.decode('UTF-8'))
-                    if key.decode("UTF-8") == "path":
-                        print ("HI")
-                        path = str(value)
+		myName = name
+		if str(name) == 'GROUP13LED._http._tcp.local.':
+			ip = info.address
+			path= ""
+			prStr = socket.inet_ntoa(ip)
+			#print('Found: ' + str(prStr) + " port: " + str(info.port) + str(info.properties))
+			if info.properties:
+				print(" Properties Are")
+				for key, value in info.properties.items():
+					print (key.decode('UTF-8'))
+					if key.decode("UTF-8") == "path":
+						print ("HI")
+						path = str(value)
 
-            print('http://' + prStr + ":" + str(info.port) + path)
+			print('http://' + prStr + ":" + str(info.port) + path)
 
 @requires_auth
 @app.route("/LED", methods=['GET'])
 def led():
-
-	if str(len(request.args)) == 3:
-	    ledstatus = request.args.get('status')
-	    ledcolor = request.args.get('color')
-	    ledintensity = request.args.get('intensity')
-        # Look for service with Zeroconf
+	print(len(request.args))
+	if len(request.args) == 3:
+		ledstatus = request.args.get('status')
+		ledcolor = request.args.get('color')
+		ledintensity = request.args.get('intensity')
+		# Look for service with Zeroconf
 
 		# connect to service with Requests library and send POST
-		r = requests.post('http://192.168.1.20:5000/LED', data={'color':ledcolor, 'status':ledstatus, 'intensity':ledintensity})
+		headers = {'content-type':'application/json'}
+		data={'color':ledcolor, 'status':ledstatus, 'intensity':ledintensity}
+		
+		r = requests.post('http://192.168.1.20:5000/LED', data=json.dumps(data), headers=headers)
 		return r.text
 		# return str(len(request.args)) + ' ' + ledstatus + ' ' + ledcolor + ' ' + str(ledintensity) + '\n'
 
-	elif str(len(request.args)) == 0:
+	elif len(request.args) == 0:
 		# Look for service with Zeroconf
 
 		# connect to service with Requests library and send GET
