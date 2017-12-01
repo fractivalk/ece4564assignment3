@@ -74,30 +74,30 @@ def LED():
                 RED.ChangeDutyCycle(0)
                 BLUE.ChangeDutyCycle(0)
                 if data['color'] == 'red':
-                    RED.ChangeDutyCycle(100)
+                    RED.ChangeDutyCycle(int(data['intensity']))
                     LED_color = 'Red'
                 elif data['color'] == 'green':
-                    GREEN.ChangeDutyCycle(100)
+                    GREEN.ChangeDutyCycle(int(data['intensity']))
                     LED_color = 'Green'
                 elif data['color'] == 'blue':
-                    BLUE.ChangeDutyCycle(100)
+                    BLUE.ChangeDutyCycle(int(data['intensity']))
                     LED_color = 'Blue'
                 elif data['color'] == 'magenta':
-                    RED.ChangeDutyCycle(100)
-                    BLUE.ChangeDutyCycle(100)
+                    RED.ChangeDutyCycle(int(data['intensity']))
+                    BLUE.ChangeDutyCycle(int(data['intensity']))
                     LED_color = 'Magenta'
                 elif data['color'] == 'cyan':
-                    GREEN.ChangeDutyCycle(100)
-                    BLUE.ChangeDutyCycle(100)
+                    GREEN.ChangeDutyCycle(int(data['intensity']))
+                    BLUE.ChangeDutyCycle(int(data['intensity']))
                     LED_color = 'Cyan'
                 elif data['color'] == 'yellow':
-                    RED.ChangeDutyCycle(100)
-                    GREEN.ChangeDutyCycle(100)
+                    RED.ChangeDutyCycle(int(data['intensity']))
+                    GREEN.ChangeDutyCycle(int(data['intensity']))
                     LED_color = 'Yellow'
                 elif data['color'] == 'white':
-                    RED.ChangeDutyCycle(100)
-                    GREEN.ChangeDutyCycle(100)
-                    BLUE.ChangeDutyCycle(100)
+                    RED.ChangeDutyCycle(int(data['intensity']))
+                    GREEN.ChangeDutyCycle(int(data['intensity']))
+                    BLUE.ChangeDutyCycle(int(data['intensity']))
                     LED_color = 'White'
                 else:
                     return 'Color not supported\n'
